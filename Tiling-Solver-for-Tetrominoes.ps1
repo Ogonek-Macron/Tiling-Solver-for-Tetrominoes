@@ -1,6 +1,6 @@
 #Tiling_Solver_for_Tetrominoes
 #
-#Ver 0.1
+#Ver 0.2
 
 using namespace System.Collections.Generic
 
@@ -799,7 +799,7 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
     }
 
 
-    $field_to_fill = (EditFumen_RawToTable $Input_Tetfu)[$Page_No - 1].field_current[(230 - 10 * $Height)..229]
+    [List[int]]$field_to_fill = (EditFumen_RawToTable $Input_Tetfu)[$Page_No - 1].field_current[(230 - 10 * $Height)..229]
 
 
 
@@ -852,6 +852,71 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
     #指定にないミノを除去する (即席)
     $placement_list = $placement_list.FindAll([Predicate[object]]{ param($x) $pieces_counter[$x.piece_no - 1]})
 
+    #--------------------
+    #パリティ関連処理
+    #Rule:201 と Rule:211 について知りたいので、Rule:200 を調べる
+
+    [List[int]]$parity_r200 = @(0,0,0,0)
+
+    switch(0..($field_to_fill.Count - 1))
+    {
+        default
+        {
+            if($field_to_fill[$_])
+            {
+                $parity_r200[$_ % 2 + [math]::Floor($_ / 10) % 2 * 2]++
+            }
+        }
+    }
+
+    $parity_r211_diff = $parity_r200[0] + $parity_r200[3] - $parity_r200[1] - $parity_r200[2]
+    $parity_r201_diff = $parity_r200[0] + $parity_r200[2] - $parity_r200[1] - $parity_r200[3]
+
+    #T が最低何個必要か求める
+    $parity_T_min = [math]::Abs($parity_r211_diff / 2)
+
+    #入力された T の個数について偶奇が間違っているならば 1 を減算する
+    if(($pieces_counter[4] + $parity_T_min) % 2)
+    {
+        $pieces_counter[4]--
+        $pieces_counter_sum--
+    }
+
+    #T が足りないならば解なしとして終了する
+    if($parity_T_min -gt $pieces_counter[4])
+    {
+        $num_of_solutions = 0
+        $solutions_tetfu_splited = 'Not Found'
+        $solutions_tetfu_reduced = 'Not Found'
+        $all_solutions_tetfu = 'Not Found'
+
+        return = @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+    }
+
+    #T の必要個数と入力個数が一致する場合、T の置き方を絞り込める
+    if($parity_T_min -and ($parity_T_min -eq $pieces_counter[4]))
+    {
+        #T の置き方の候補をフィルターする
+        $placement_list = $placement_list.FindAll([Predicate[object]]{ param($x) -not (($x.piece_id -ge 16) -and ((($x.location % 10) + [math]::Floor($x.location / 10) + ($parity_r211_diff -gt 0)) % 2)) })
+    }
+
+    #JL の個数が確定する場合、T 縦の個数の偶奇が確定する
+    #このうち、T が 1 個の場合においては T の置き方を絞り込める
+    if(($pieces_counter_sum -eq $need_pieces) -and ($pieces_counter[4] -eq 1))
+    {
+        #true なら縦
+        if([bool]($parity_r201_diff % 4))
+        {
+            $placement_list = $placement_list.FindAll([Predicate[object]]{ param($x) (($x.piece_id -ne 16) -and ($x.piece_id -ne 18))})
+        }
+        #false なら横
+        else
+        {
+            $placement_list = $placement_list.FindAll([Predicate[object]]{ param($x) (($x.piece_id -ne 17) -and ($x.piece_id -ne 19))})
+        }
+    }
+    #パリティ関連処理ここまで
+    #--------------------
 
     #置き方がないので解なしとして終了する
     if($placement_list.Count -eq 0)
