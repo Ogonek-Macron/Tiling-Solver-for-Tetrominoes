@@ -1,6 +1,6 @@
 #Tiling_Solver_for_Tetrominoes
 #
-#Ver 0.3
+#Ver 0.4
 
 using namespace System.Collections.Generic
 
@@ -965,7 +965,7 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
         $all_solutions_tetfu = [TSolver_FumensList_All]::new()
         $all_solutions_tetfu.Add('Not Found')
 
-        return = @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
 
@@ -1001,7 +1001,7 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
         $all_solutions_tetfu = [TSolver_FumensList_All]::new()
         $all_solutions_tetfu.Add('Not Found')
 
-        return = @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
     #必要なミノ数を判定
@@ -1025,7 +1025,7 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
         $all_solutions_tetfu = [TSolver_FumensList_All]::new()
         $all_solutions_tetfu.Add('Not Found')
 
-        return = @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
     #ミノ 1 つの置き方を無条件で列挙する (効率悪いけど)
@@ -1077,7 +1077,7 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
         $all_solutions_tetfu = [TSolver_FumensList_All]::new()
         $all_solutions_tetfu.Add('Not Found')
 
-        return = @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
     #T の必要個数と入力個数が一致する場合、T の置き方を絞り込める
@@ -1119,7 +1119,7 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
         $all_solutions_tetfu = [TSolver_FumensList_All]::new()
         $all_solutions_tetfu.Add('Not Found')
 
-        return = @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
     #セルごとに置き方が何通りあるかの一覧を返す
@@ -1157,7 +1157,7 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
         $all_solutions_tetfu = [TSolver_FumensList_All]::new()
         $all_solutions_tetfu.Add('Not Found')
 
-        return = @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
     #置き方が最も少ないセルに置く方法を抽出する
