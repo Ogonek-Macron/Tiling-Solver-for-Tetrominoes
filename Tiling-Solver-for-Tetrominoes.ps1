@@ -1,6 +1,6 @@
 #Tiling_Solver_for_Tetrominoes
 #
-#Ver 0.4
+#Ver 0.5
 
 using namespace System.Collections.Generic
 
@@ -537,24 +537,6 @@ function TSolver_EFL_Chunk([String]$Tetfu_Raw, [int]$Size = 1)
 }
 
 
-#複数のテト譜を入力して 1 つのテト譜にまとめる
-function TSolver_EFL_Concat-Fumen([List[String]]$Tetfu_Raw_List)
-{
-    $Tetfu_Raw_List = [List[String]](-split $Tetfu_Raw_List)
-    
-    $tetfu_table = TSolver_EFL_EditFumen_RawToTable $Tetfu_Raw_List[0]
-    
-    for($i = 1; $i -lt $Tetfu_Raw_List.Count; $i++)
-    {
-        $tetfu_table_to_append = TSolver_EFL_EditFumen_RawToTable $Tetfu_Raw_List[$i]
-        $tetfu_table.AddRange($tetfu_table_to_append)
-    }
-    
-    $output_tetfu = TSolver_EFL_EditFumen_TableToRaw $tetfu_table
-    return $output_tetfu
-}
-
-
 #指定したページの地形の高さを取得する (リストで指定可能)
 function TSolver_EFL_Get-Height([String]$Tetfu_Raw, [List[int]]$PageNo = [List[int]]::new([int[]](1..(TSolver_EFL_Count $Tetfu_Raw))))
 {
@@ -589,7 +571,7 @@ class TSolver_FumensList: List[String]
             if($this[0] -eq 'Not Found')
             { $this } 
             else
-            { switch($this) { default {'http://fumen.zui.jp/?' + $_} } }
+            { switch($this) { default {'https://fumen.zui.jp/?' + $_} } }
         )
     }
 
@@ -599,7 +581,7 @@ class TSolver_FumensList: List[String]
             if($this[0] -eq 'Not Found')
             { $this } 
             else
-            { switch($this) { default {'http://fumen.zui.jp/?' + $_} } }
+            { switch($this) { default {'https://fumen.zui.jp/?' + $_} } }
         )
     }
 
@@ -609,9 +591,9 @@ class TSolver_FumensList: List[String]
     {
         return $(
             if($this[0] -eq 'Not Found')
-            { $this } 
+            { $this }
             else
-            { switch($this) { default {'http://fumen.zui.jp/?d' + $_.SubString(1)} } }
+            { switch($this) { default {'https://fumen.zui.jp/?d' + $_.SubString(1)} } }
         )
     }
 
@@ -619,9 +601,9 @@ class TSolver_FumensList: List[String]
     {
         return $(
             if($this[0] -eq 'Not Found')
-            { $this } 
+            { $this }
             else
-            { switch($this) { default {'http://fumen.zui.jp/?d' + $_.SubString(1)} } }
+            { switch($this) { default {'https://fumen.zui.jp/?d' + $_.SubString(1)} } }
         )
     }
 
@@ -631,9 +613,9 @@ class TSolver_FumensList: List[String]
     {
         return $(
             if($this[0] -eq 'Not Found')
-            { $this } 
+            { $this }
             else
-            { switch($this) { default {'http://fumen.zui.jp/?D' + $_.SubString(1)} } }
+            { switch($this) { default {'https://fumen.zui.jp/?D' + $_.SubString(1)} } }
         )
     }
 
@@ -643,9 +625,9 @@ class TSolver_FumensList: List[String]
     {
         return $(
             if($this[0] -eq 'Not Found')
-            { $this } 
+            { $this }
             else
-            { switch($this) { default {'http://fumen.zui.jp/?m' + $_.SubString(1)} } }
+            { switch($this) { default {'https://fumen.zui.jp/?m' + $_.SubString(1)} } }
         )
     }
 
@@ -655,7 +637,7 @@ class TSolver_FumensList: List[String]
     {
         return $(
             if($this[0] -eq 'Not Found')
-            { $this } 
+            { $this }
             else
             { switch($this) { default {'https://knewjade.github.io/fumen-for-mobile/#?d=' + $_} } }
         )
@@ -667,7 +649,7 @@ class TSolver_FumensList: List[String]
     {
         return $(
             if($this[0] -eq 'Not Found')
-            { $this } 
+            { $this }
             else
             { switch($this) { default {'https://harddrop.com/fumen/?' + $_} } }
         )
@@ -679,24 +661,24 @@ class TSolver_FumensList: List[String]
     {
         return $(
             if($this[0] -eq 'Not Found')
-            { $this } 
+            { $this }
             else
             { switch($this) { default {'https://harddrop.com/fumen/?d' + $_.SubString(1)} } }
         )
     }
-    
+
     #----------------------------------------
     #Hard Drop (VIEW)
     [List[string]]HardDropView()
     {
         return $(
             if($this[0] -eq 'Not Found')
-            { $this } 
+            { $this }
             else
             { switch($this) { default {'https://harddrop.com/fumen/?m' + $_.SubString(1)} } }
         )
     }
-    
+
 }
 
 class TSolver_FumensList_All: TSolver_FumensList
@@ -705,7 +687,7 @@ class TSolver_FumensList_All: TSolver_FumensList
     [TSolver_FumensList]Chunk([int]$TSolver_chunk_size)
     {
         if($this[0] -eq 'Not Found')
-        { return $this } 
+        { return $this }
         else
         {
             $all_solutions_tetfu_chunk = [TSolver_FumensList]::new()
@@ -724,7 +706,6 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
     #後でちゃんと実装する
     #_ILOZTJSX
     [List[int]]$pieces_counter = $Pieces_Counter_Input[0,2,3,6,5,1,4]
-    $placed_counter = 0
 
     #変数
 
@@ -773,27 +754,29 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
     #関数
 
     #次の 1 手の置き方を列挙する
-    function Get_Placement_List($Field_To_Fill)
+    function Get_Placement_List($Field_To_Fill_Hashset)
     {
         $placement_list = New-Object List[Object]
     
         foreach($piece in $finder_piece_info_table)
         {
-            foreach($y in ($piece.y_bigin)..($height + $piece.y_end))
+            #指定にないミノは探索しない
+            if($pieces_counter[$piece.piece_no - 1])
             {
-                foreach($x in ($piece.x_bigin)..($piece.x_end))
+                foreach($y in ($piece.y_bigin)..($height + $piece.y_end))
                 {
-                    $location = ($x + 10 * ($height - $y - 1))
-
-                    #配置できるか判定
-                    $can_place = $field_to_fill[$location + $piece.shape[0]] * $field_to_fill[$location + $piece.shape[1]] * $field_to_fill[$location + $piece.shape[2]] * $field_to_fill[$location + $piece.shape[3]]
-
-                    if($can_place)
+                    foreach($x in ($piece.x_bigin)..($piece.x_end))
                     {
-                        #リストに置き方を追加
-                        $placement_list.Add([object]@{piece_id = $piece.finder_piece_id; piece_no = $piece.piece_no; rotation_no = $piece.rotation_no; location = $location; filled_cells = @(($location + $piece.shape[0]), ($location + $piece.shape[1]), ($location + $piece.shape[2]), ($location + $piece.shape[3]));})
+                        $location = ($x + 10 * (23 - $y - 1))
 
+                        #配置できるか判定
+                        $can_place = $field_to_fill_hashset.IsSupersetOf([List[int]](($location + $piece.shape[0]), ($location + $piece.shape[1]), ($location + $piece.shape[2]), ($location + $piece.shape[3])))
 
+                        if($can_place)
+                        {
+                            #リストに置き方を追加
+                            $placement_list.Add([object]@{piece_id = $piece.finder_piece_id; piece_no = $piece.piece_no; rotation_no = $piece.rotation_no; location = $location; filled_cells = [HashSet[int]](($location + $piece.shape[0]), ($location + $piece.shape[1]), ($location + $piece.shape[2]), ($location + $piece.shape[3]));})
+                        }
                     }
                 }
             }
@@ -804,9 +787,9 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
 
     #セルごとに置き方が何通りあるかの一覧を返す
     #埋まっているセルは 100
-    function Count_Placements_By_Cell([List[Object]]$Placement_List, $Field_To_Fill)
+    function Count_Placements_By_Cell([List[Object]]$Placement_List, $Field_To_Fill_Hashset)
     { 
-        $placement_count_by_cell = switch ($Field_To_Fill) { default {100 * ($_ -eq 0)} }
+        $placement_count_by_cell = [int[]]::new(230)
 
         switch ($Placement_List.filled_cells)
         {
@@ -815,7 +798,6 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
                 $placement_count_by_cell[$_]++
             }
         }
-
         return $placement_count_by_cell
     }
 
@@ -830,25 +812,20 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
         $current_placement.Add($_)
 
         #既に置いた位置に被らないように
-        foreach($index in $current_placement[-1].filled_cells)
-        {
-            $field_to_fill[$index] = 0
-        }
-
+        $field_to_fill_hashset.ExceptWith($current_placement[-1].filled_cells)
+        
         #上記で置いたので、ミノ数のカウンターを更新する
         $pieces_counter[$current_placement[-1].piece_no - 1]--
-        $placed_counter++
-    
         #--------------------
-
+        
         #--------------------
         #全セルが埋まっていればそれが解なので、記録して戻る
-        if($placed_counter -eq $need_pieces)
+        if($field_to_fill_hashset.Count -eq 0)
         {
             $current_solution = New-Object List[Object]([List[Object[]]]($current_placement))
             $solutions_table.Add($current_solution)
-            $placed_counter--
             $pieces_counter[$current_placement[-1].piece_no - 1]++
+            $field_to_fill_hashset.UnionWith($current_placement[-1].filled_cells)
             $current_placement.RemoveAt($current_placement.Count - 1)
             return
         }
@@ -860,29 +837,27 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
         #
         #置くことが出来る 1 手のリストを生成する
         #前の階層で使ったものからフィルターして求める
-        $placement_list = $placement_list.FindAll([Predicate[object]]{ param($x) (-not ([List[int]]$field_to_fill[$x.filled_cells]).Contains(0)) -and $pieces_counter[$x.piece_no - 1] })
-
+        $placement_list = $placement_list.FindAll([Predicate[object]]{ param($x) $x.filled_cells.IsSubsetOf($field_to_fill_hashset) -and $pieces_counter[$x.piece_no - 1] })
+        
         #(この間でパリティや盤面の分割を考慮してさらに絞り込むこともやろうと思えばできる)
 
 
         if($placement_list.Count -eq 0)
         {
             #置き方がないので戻る
-            $placed_counter--
             $pieces_counter[$current_placement[-1].piece_no - 1]++
+            $field_to_fill_hashset.UnionWith($current_placement[-1].filled_cells)
             $current_placement.RemoveAt($current_placement.Count - 1)
             return
         }
-    
+        
         #セルごとに置き方が何通りあるかの一覧を返す
-        #埋まっているセルは 100
-        [List[Int]]$placement_count_by_cell = Count_Placements_By_Cell $placement_list $field_to_fill
+        [List[Int]]$placement_count_by_cell = Count_Placements_By_Cell $placement_list $field_to_fill_hashset
 
         #置き方が最も少ないセルの置き方が何通りあるか取得する
-        #ただし、すべて埋まっている場合は 100
         #同時に、置き方が最も少ないセルの位置を取得する
         $min = 100
-        switch(0..($placement_count_by_cell.Count - 1))
+        switch($field_to_fill_hashset)
         {
             default
             {
@@ -893,48 +868,44 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
                 }
             }
         }
-
-
+        
         if($min -eq 0)
         {
             #埋められないマスがあるので戻る
-            $placed_counter--
             $pieces_counter[$current_placement[-1].piece_no - 1]++
+            $field_to_fill_hashset.UnionWith($current_placement[-1].filled_cells)
             $current_placement.RemoveAt($current_placement.Count - 1)
             return
         }
 
-        #置き方が最も少ないセルに置く方法を抽出する
-        $placement_to_tgt_list = $placement_list.FindAll([Predicate[object]]{ param($x) ([List[int]]$x.filled_cells).Contains($tgt_index) })
-
         #---------------------
-        #$field_buff[1] なら、1 ミノ置いた状態を記憶している
-        $field_buff.Add($field_to_fill)
-        $placement_buff.Add($placement_list)
-        $pieces_counter_buff.Add($pieces_counter)
-        $placement_to_tgt_buff.Add($placement_to_tgt_list)
+        #$placement_buff[1] なら、1 ミノ置いた状態を記憶している
+
+        $placement_buff.Add([List[Object]]::new())
+        $placement_buff[-1].AddRange($placement_list)
 
         #---------------------
         #各要素についてループする
 
-        switch($placement_to_tgt_list)
+        switch($placement_buff[-1])
         {
             default
             {
-                $field_to_fill = New-Object List[int]([List[int[]]]($field_buff[-1]))
-                $placement_list = New-Object List[Object]([List[Object[]]]($placement_buff[-1]))
-                $pieces_counter = New-Object List[int]([List[int[]]]($pieces_counter_buff[-1]))
-                $placement_to_tgt_list = New-Object List[Object]([List[Object[]]]($placement_to_tgt_buff[-1]))
+                #置き方が最も少ないセルに置く方法を試す
+                if( ($_.filled_cells).Contains($tgt_index) )
+                {                
+                    $placement_list.Clear()
+                    $placement_list.AddRange($placement_buff[-1])
 
-                place_piece
+                    place_piece
+                }
             }
         }
 
         #全部を確かめたので戻る
-        $field_buff.RemoveAt($field_buff.Count - 1)
         $placement_buff.RemoveAt($placement_buff.Count - 1)
-        $pieces_counter_buff.RemoveAt($pieces_counter_buff.Count - 1)
-        $placement_to_tgt_buff.RemoveAt($placement_to_tgt_buff.Count - 1)
+        $pieces_counter[$current_placement[-1].piece_no - 1]++
+        $field_to_fill_hashset.UnionWith($current_placement[-1].filled_cells)
 
         $current_placement.RemoveAt($current_placement.Count - 1)
 
@@ -951,57 +922,51 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
 
     $height = TSolver_EFL_Get-Height $Input_Tetfu $Page_No
 
+    #アウトプット用意
+    $num_of_solutions = 0
+    $solutions_tetfu_splited = [TSolver_FumensList]::new()
+    $solutions_tetfu_reduced = [TSolver_FumensList]::new()
+    $solutions_tetfu_all = [TSolver_FumensList_All]::new()
+
     #高さが 0 だった場合、解なしとして終了する
     if($height -eq 0)
     {
-        $num_of_solutions = 0
-
-        $solutions_tetfu_splited = [TSolver_FumensList]::new()
         $solutions_tetfu_splited.Add('Not Found')
-
-        $solutions_tetfu_reduced = [TSolver_FumensList]::new()
         $solutions_tetfu_reduced.Add('Not Found')
-
-        $all_solutions_tetfu = [TSolver_FumensList_All]::new()
-        $all_solutions_tetfu.Add('Not Found')
-
-        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        $solutions_tetfu_all.Add('Not Found')
+    
+        return @{num = $num_of_solutions; all = $solutions_tetfu_all ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
 
-    [List[int]]$field_to_fill = (TSolver_EFL_EditFumen_RawToTable $Input_Tetfu)[$Page_No - 1].field_current[(230 - 10 * $Height)..229]
+    $field_base = (TSolver_EFL_EditFumen_RawToTable $Input_Tetfu)[$Page_No - 1].field_current
 
+    $field_to_fill_hashset = New-Object HashSet[int](230)
 
-
-    for($i = 0; $i -lt $field_to_fill.Count; $i++)
+    switch(0..229)
     {
-        #色を指定した処理に後程対応
-        $field_to_fill[$i] = [int](($field_to_fill[$i]) -ne 0) * 1
+        default
+        {
+            #色を指定した処理に後程対応
+            if(($field_base[$_]) -ne 0)
+            {
+                $field_base[$_] = 0
+                [void]$field_to_fill_hashset.Add($_)
+            }
+        }
     }
-
-
+    
     #ブロック数を数える
-    $num_of_blocks = 0
-    foreach($i in 0..($field_to_fill.Count - 1))
-    {
-        $num_of_blocks += $field_to_fill[$i]
-    }
+    $num_of_blocks = $field_to_fill_hashset.Count
 
     #ブロック数が 4 の倍数でないならば解なしとして終了する
     if($num_of_blocks % 4)
     {
-        $num_of_solutions = 0
-        
-        $solutions_tetfu_splited = [TSolver_FumensList]::new()
         $solutions_tetfu_splited.Add('Not Found')
-
-        $solutions_tetfu_reduced = [TSolver_FumensList]::new()
         $solutions_tetfu_reduced.Add('Not Found')
-
-        $all_solutions_tetfu = [TSolver_FumensList_All]::new()
-        $all_solutions_tetfu.Add('Not Found')
-
-        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        $solutions_tetfu_all.Add('Not Found')
+    
+        return @{num = $num_of_solutions; all = $solutions_tetfu_all ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
     #必要なミノ数を判定
@@ -1014,39 +979,26 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
     #ミノが足りなければ、解なしとして終了する
     if($pieces_counter_sum -lt $need_pieces)
     {
-        $num_of_solutions = 0
-        
-        $solutions_tetfu_splited = [TSolver_FumensList]::new()
         $solutions_tetfu_splited.Add('Not Found')
-
-        $solutions_tetfu_reduced = [TSolver_FumensList]::new()
         $solutions_tetfu_reduced.Add('Not Found')
-
-        $all_solutions_tetfu = [TSolver_FumensList_All]::new()
-        $all_solutions_tetfu.Add('Not Found')
-
-        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        $solutions_tetfu_all.Add('Not Found')
+    
+        return @{num = $num_of_solutions; all = $solutions_tetfu_all ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
-    #ミノ 1 つの置き方を無条件で列挙する (効率悪いけど)
-    $placement_list = Get_Placement_List $field_to_fill
-    #指定にないミノを除去する (即席)
-    $placement_list = $placement_list.FindAll([Predicate[object]]{ param($x) $pieces_counter[$x.piece_no - 1]})
+    #指定にあるミノに限り 1 つの置き方を列挙する
+    $placement_list = Get_Placement_List $field_to_fill_hashset
 
     #--------------------
     #パリティ関連処理
     #Rule:201 と Rule:211 について知りたいので、Rule:200 を調べる
 
     [List[int]]$parity_r200 = @(0,0,0,0)
-
-    switch(0..($field_to_fill.Count - 1))
+    switch($field_to_fill_hashset)
     {
         default
         {
-            if($field_to_fill[$_])
-            {
-                $parity_r200[$_ % 2 + [math]::Floor($_ / 10) % 2 * 2]++
-            }
+            $parity_r200[$_ % 2 + [math]::Floor($_ / 10) % 2 * 2]++
         }
     }
 
@@ -1066,18 +1018,11 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
     #T が足りないならば解なしとして終了する
     if($parity_T_min -gt $pieces_counter[4])
     {
-        $num_of_solutions = 0
-        
-        $solutions_tetfu_splited = [TSolver_FumensList]::new()
         $solutions_tetfu_splited.Add('Not Found')
-
-        $solutions_tetfu_reduced = [TSolver_FumensList]::new()
         $solutions_tetfu_reduced.Add('Not Found')
-
-        $all_solutions_tetfu = [TSolver_FumensList_All]::new()
-        $all_solutions_tetfu.Add('Not Found')
-
-        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        $solutions_tetfu_all.Add('Not Found')
+    
+        return @{num = $num_of_solutions; all = $solutions_tetfu_all ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
     #T の必要個数と入力個数が一致する場合、T の置き方を絞り込める
@@ -1108,29 +1053,20 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
     #置き方がないので解なしとして終了する
     if($placement_list.Count -eq 0)
     {
-        $num_of_solutions = 0
-        
-        $solutions_tetfu_splited = [TSolver_FumensList]::new()
         $solutions_tetfu_splited.Add('Not Found')
-
-        $solutions_tetfu_reduced = [TSolver_FumensList]::new()
         $solutions_tetfu_reduced.Add('Not Found')
-
-        $all_solutions_tetfu = [TSolver_FumensList_All]::new()
-        $all_solutions_tetfu.Add('Not Found')
-
-        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        $solutions_tetfu_all.Add('Not Found')
+    
+        return @{num = $num_of_solutions; all = $solutions_tetfu_all ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
 
     #セルごとに置き方が何通りあるかの一覧を返す
-    #埋まっているセルは 100
-    [List[Int]]$placement_count_by_cell = Count_Placements_By_Cell $placement_list $field_to_fill
+    [List[Int]]$placement_count_by_cell = Count_Placements_By_Cell $placement_list $field_to_fill_hashset
 
     #置き方が最も少ないセルの置き方が何通りあるか取得する
-    #ただし、すべて埋まっている場合は 100
     #同時に、置き方が最も少ないセルの位置を取得する
     $min = 100
-    switch(0..($placement_count_by_cell.Count - 1))
+    switch($field_to_fill_hashset)
     {
         default
         {
@@ -1146,90 +1082,81 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
     #埋められないマスがあるので解なしとして終了
     if($min -eq 0)
     {
-        $num_of_solutions = 0
-        
-        $solutions_tetfu_splited = [TSolver_FumensList]::new()
         $solutions_tetfu_splited.Add('Not Found')
-
-        $solutions_tetfu_reduced = [TSolver_FumensList]::new()
         $solutions_tetfu_reduced.Add('Not Found')
-
-        $all_solutions_tetfu = [TSolver_FumensList_All]::new()
-        $all_solutions_tetfu.Add('Not Found')
-
-        return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+        $solutions_tetfu_all.Add('Not Found')
+    
+        return @{num = $num_of_solutions; all = $solutions_tetfu_all ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
     }
-
-    #置き方が最も少ないセルに置く方法を抽出する
-    $placement_to_tgt_list = $placement_list.FindAll([Predicate[object]]{ param($x) ([List[int]]$x.filled_cells).Contains($tgt_index) })
 
     #---------------------
     #記憶領域確保
-    $field_buff = New-Object List[List[int]]($need_pieces + 1)
     $placement_buff = New-Object List[List[Object]]($need_pieces + 1)
-    $pieces_counter_buff = New-Object List[List[int]]($need_pieces + 1)
-    $placement_to_tgt_buff = New-Object List[List[Object]]($need_pieces + 1)
 
     $current_placement = New-Object List[Object]($need_pieces + 1)
 
-    #$field_buff[0] なら、0 ミノ置いた状態を記憶している
-    $field_buff.Add($field_to_fill)
-    $placement_buff.Add($placement_list)
-    $pieces_counter_buff.Add($pieces_counter)
-    $placement_to_tgt_buff.Add($placement_to_tgt_list)
+    #$placement_buff[0] なら、0 ミノ置いた状態を記憶している
+
+    $placement_buff.Add([List[Object]]::new())
+    $placement_buff[-1].AddRange($placement_list)
 
     #---------------------
     #各要素についてループする
 
-    switch($placement_to_tgt_list)
+    switch($placement_buff[-1])
     {
         default
         {
-            $field_to_fill = New-Object List[int]([List[int[]]]($field_buff[-1]))
-            $placement_list = New-Object List[Object]([List[Object[]]]($placement_buff[-1]))
-            $pieces_counter = New-Object List[int]([List[int[]]]($pieces_counter_buff[-1]))
-            $placement_to_tgt_list = New-Object List[Object]([List[Object[]]]($placement_to_tgt_buff[-1]))
-            place_piece
+            #置き方が最も少ないセルに置く方法を試す
+            if( ($_.filled_cells).Contains($tgt_index) )
+            {
+                $placement_list.Clear()
+                $placement_list.AddRange($placement_buff[-1])
+                
+                place_piece
+            }
         }
     }
 
     #--------------------------------------------------
     #以下、アウトプットにかかわる部分
-    $num_of_solutions = $solutions_table.Count
-    if($num_of_solutions -eq 0)
+    if($solutions_table.Count -eq 0)
     {
-        
-        $solutions_tetfu_splited = [TSolver_FumensList]::new()
         $solutions_tetfu_splited.Add('Not Found')
-
-        $solutions_tetfu_reduced = [TSolver_FumensList]::new()
         $solutions_tetfu_reduced.Add('Not Found')
-
-        $all_solutions_tetfu = [TSolver_FumensList_All]::new()
-        $all_solutions_tetfu.Add('Not Found')
+        $solutions_tetfu_all.Add('Not Found')
     }
     else
     {
-        $solutions_tetfu_splited = [TSolver_FumensList]::new()
-        $solutions_tetfu_reduced = [TSolver_FumensList]::new()
-        $all_solutions_tetfu = [TSolver_FumensList_All]::new()
+        $num_of_solutions = $solutions_table.Count
+
+        $exist_blocks_in_base = $field_base.Exists([Predicate[int]]{ param($x) $x -gt 0})
+        
+        $splited_str_base = TSolver_EFL_EditFumen_TableToRaw @([object]@{field_current = $field_base; field_updated = $field_base; piece = 0; rotation = 0; location = 0; flag_raise = 0; flag_mirror = 0; flag_color = 1; flag_comment = 0; flag_lock = 1; comment_current_length = 0; comment_current = ''; comment_updated_length = 0; comment_updated = '';})
+        $splited_str_base = $splited_str_base.Remove($splited_str_base.Length - 3)
+
+        $splited_str_length = $splited_str_base.Length + ($need_pieces + $exist_blocks_in_base) * 3
+        $splited_str_? = [math]::Floor($splited_str_length / 47)
+        $splited_str_length += $splited_str_?
+
+        $data_list_all = New-Object List[Object]($num_of_solutions)
 
         #各解について
         foreach($i in 0..($num_of_solutions - 1))
         {
-            $data_list_splited = TSolver_EFL_EditFumen_RawToTable (TSolver_EFL_Blank-Fumen)
-            $data_list_reduced = TSolver_EFL_EditFumen_RawToTable (TSolver_EFL_Blank-Fumen)
+            $data_list_reduced = New-Object List[Object](1)
 
-            $splited_field_prev = [List[int]](@(0) * 240)
-            $reduced_field_current = [List[int]](@(0) * 240)
+            $reduced_field_current = New-Object List[int]([List[int[]]]$field_base)
+
+            $splited_str_builder = New-Object System.Text.StringBuilder($splited_str_base, $splited_str_length)
+
             #1 手ずつ確認する
-            
             foreach($j in 0..($need_pieces - 1))
             {
                 #splited のデータを編集
 
                 #ライン消去が入ったら足す
-                $location_converter = 23 - $height
+                $location_converter = 0
             
                 #下にある各段が埋まっているかに基づく処理
                 for($k = 0; $k -lt [math]::Floor($solutions_table[$i][$j].location / 10); $k++)
@@ -1241,31 +1168,48 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
                     }
                 }
 
-                $splited_field_current = New-Object List[int]([List[int[]]]$splited_field_prev)
-                $splited_field_updated = New-Object List[int]([List[int[]]]$splited_field_prev)
-                #フィールドの更新
-                $splited_field_updated = TSolver_EFL_EditTable_UpdateField ($splited_field_updated) ($solutions_table[$i][$j].piece_no) ($solutions_table[$i][$j].rotation_no) ($solutions_table[$i][$j].location + 10 * $location_converter) 1 0 0
-
-                $data_list_splited.Add([object]@{field_current = $splited_field_current; field_updated = $splited_field_updated; piece = $solutions_table[$i][$j].piece_no; rotation = $solutions_table[$i][$j].rotation_no; location = ($solutions_table[$i][$j].location + 10 * $location_converter); flag_raise = 0; flag_mirror = 0; flag_color = 1; flag_comment = 0; flag_lock = 1; comment_current_length = 0; comment_current = ''; comment_updated_length = 0; comment_updated = '';})
-                $splited_field_prev = New-Object List[int]([List[int[]]]$splited_field_updated)
+                $splited_str_builder = $splited_str_builder.Append((TSolver_EFL_ValueToBase64 ($solutions_table[$i][$j].piece_no + $solutions_table[$i][$j].rotation_no * 8 + ($solutions_table[$i][$j].location + 10 * $location_converter) * 32 + 30720) 3))
 
                 #reduced のデータを編集
-                foreach($k in 0..3)
+                foreach($cells in $solutions_table[$i][$j].filled_cells)
                 {
-                    $reduced_field_current[$solutions_table[$i][$j].filled_cells[$k] + 10 * (23 - $height)] = $solutions_table[$i][$j].piece_no
+                    $reduced_field_current[$cells] = $solutions_table[$i][$j].piece_no
                 }
             }
+
+            #split 後処理
+            if($splited_str_builder.ToString(5, 2).Equals('vh'))
+            {
+                #vh の後をいじる
+                $splited_str_builder[7] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.Substring(($need_pieces - 1) % 64, 1)
+            }
+            else
+            {
+                #vh を挿入する
+                $splited_str_builder = $splited_str_builder.Insert($splited_str_base.Length, 'vh' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.Substring(($need_pieces - 2) % 64, 1))
+            }
+            #? を挿入する
+            for($i = 0; (48 * $i + 47) -le ($splited_str_builder.Length); $i++)
+            {
+                $splited_str_builder = $splited_str_builder.Insert(48 * $i + 47, '?')
+            }
             
-            $data_list_reduced.Add([object]@{field_current = $reduced_field_current; field_updated = $reduced_field_current; piece = 0; rotation = 0; location = 0; flag_raise = 0; flag_mirror = 0; flag_color = 1; flag_comment = 0; flag_lock = 1; comment_current_length = 0; comment_current = ''; comment_updated_length = 0; comment_updated = '';})
+            #reduce のフィールドの更新
+            $reduced_field_updated = New-Object List[int]([List[int[]]]$reduced_field_current)
+            $reduced_field_updated = TSolver_EFL_EditTable_UpdateField $reduced_field_updated 0 0 0 1 0 0
             
-            $solutions_tetfu_splited.Add((TSolver_EFL_EditFumen_TableToRaw $data_list_splited[1..$need_pieces]))
-            $solutions_tetfu_reduced.Add((TSolver_EFL_EditFumen_TableToRaw $data_list_reduced[1]))
+            $data_list_reduced.Add([object]@{field_current = $reduced_field_current; field_updated = $reduced_field_updated; piece = 0; rotation = 0; location = 0; flag_raise = 0; flag_mirror = 0; flag_color = 1; flag_comment = 0; flag_lock = 1; comment_current_length = 0; comment_current = ''; comment_updated_length = 0; comment_updated = '';})
+            $data_list_all.Add([object]@{field_current = $reduced_field_current; field_updated = $reduced_field_updated; piece = 0; rotation = 0; location = 0; flag_raise = 0; flag_mirror = 0; flag_color = 1; flag_comment = 0; flag_lock = 1; comment_current_length = 0; comment_current = ''; comment_updated_length = 0; comment_updated = '';})
+            
+            #テト譜の追加
+            $solutions_tetfu_splited.Add($splited_str_builder.ToString())
+            $solutions_tetfu_reduced.Add((TSolver_EFL_EditFumen_TableToRaw $data_list_reduced))
         }
 
-        $all_solutions_tetfu.Add((TSolver_EFL_Concat-Fumen $solutions_tetfu_reduced))
-
+        $solutions_tetfu_all.Add((TSolver_EFL_EditFumen_TableToRaw $data_list_all))
     }
-
-    return @{num = $num_of_solutions; all = $all_solutions_tetfu ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+    
+    return @{num = $num_of_solutions; all = $solutions_tetfu_all ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
 
 }
+
