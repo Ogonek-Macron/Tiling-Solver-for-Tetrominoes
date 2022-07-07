@@ -1,6 +1,6 @@
 #Tiling_Solver_for_Tetrominoes
 #
-#Ver 0.5
+#Ver 0.6
 
 using namespace System.Collections.Generic
 
@@ -1017,6 +1017,16 @@ function Find-Tilings([String]$Input_Tetfu, [Int]$Page_No = 1, [List[int]]$Piece
 
     #T が足りないならば解なしとして終了する
     if($parity_T_min -gt $pieces_counter[4])
+    {
+        $solutions_tetfu_splited.Add('Not Found')
+        $solutions_tetfu_reduced.Add('Not Found')
+        $solutions_tetfu_all.Add('Not Found')
+    
+        return @{num = $num_of_solutions; all = $solutions_tetfu_all ; split = $solutions_tetfu_splited; reduce = $solutions_tetfu_reduced}
+    }
+
+    #ミノが足りなければ、解なしとして終了する
+    if($pieces_counter_sum -lt $need_pieces)
     {
         $solutions_tetfu_splited.Add('Not Found')
         $solutions_tetfu_reduced.Add('Not Found')
